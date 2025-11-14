@@ -1,0 +1,278 @@
+import 'package:flutter/material.dart';
+
+void main() {
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: const HomePage(),
+      routes: {
+        '/settings': (context) => const SettingsPage(),
+      },
+    );
+  }
+}
+
+class HomePage extends StatefulWidget {
+  const HomePage({super.key});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage>
+    with SingleTickerProviderStateMixin {
+  String fullSentence = "";
+  String customText = "";
+  late TabController _tabController;
+
+  final Map<String, List<Map<String, String>>> _categories = {
+    "Saudações": [
+      {"text": "Olá"},
+      {"text": "Oi"},
+      {"text": "Bom dia"},
+    ],
+    "Comidas": [
+      {"text": "Quero água"},
+      {"text": "Estou com fome"},
+      {"text": "Quero suco"},
+    ],
+    "Sentimentos": [
+      {"text": "Estou feliz"},
+      {"text": "Estou triste"},
+      {"text": "Estou cansado"},
+    ],
+  };
+
+  @override
+  void initState() {
+    super.initState();
+    // +1 aba para "Texto Livre"
+    _tabController =
+        TabController(length: _categories.length + 1, vsync: this);
+  }
+
+  void addWord(String word) {
+    setState(() {
+      fullSentence += (fullSentence.isEmpty ? "" : " ") + word;
+    });
+  }
+
+  void removeLastWord() {
+    setState(() {
+      if (fullSentence.isEmpty) return;
+      final words = fullSentence.trim().split(' ');
+      words.removeLast();
+      fullSentence = words.join(' ');
+    });
+  }
+
+  void speak() {
+    final textToSpeak =
+        _tabController.index == _categories.length ? customText : fullSentence;
+
+    if (textToSpeak.trim().isEmpty) return;
+    print("Falar: $textToSpeak");
+    // Aqui você poderá integrar com o Text-to-Speech futuramente
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final categoryTabs = _categories.keys
+        .map((cat) => Tab(text: cat))
+        .toList();
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Comunicação Aumentativa"),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.settings),
+            onPressed: () {
+              Navigator.pushNamed(context, '/settings');
+            },
+          ),
+        ],
+      ),
+      body: Column(
+        children: [
+          // 🔹 Caixa branca da frase + botão backspace
+          Container(
+            margin: const EdgeInsets.all(8),
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            decoration: BoxDecoration(
+              color: Colors.blue[50],
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.blueAccent, width: 1),
+            ),
+            height: 60,
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    _tabController.index == _categories.length
+                        ? (customText.isEmpty
+                            ? "Digite algo abaixo"
+                            : customText)
+                        : (fullSentence.isEmpty
+                            ? "Toque nos botões abaixo"
+                            : fullSentence),
+                    style: const TextStyle(fontSize: 18),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                if (_tabController.index != _categories.length)
+                  IconButton(
+                    icon: const Icon(Icons.backspace_outlined),
+                    color: Colors.redAccent,
+                    onPressed:
+                        fullSentence.isEmpty ? null : removeLastWord,
+                  ),
+              ],
+            ),
+          ),
+
+          // 🔹 TabBar (fora da AppBar)
+          TabBar(
+            controller: _tabController,
+            labelColor: Colors.blueAccent,
+            unselectedLabelColor: Colors.black54,
+            indicatorColor: Colors.blueAccent,
+            tabs: [
+              ...categoryTabs,
+              const Tab(text: "Texto Livre"),
+            ],
+          ),
+
+          // 🔹 Conteúdo das abas
+          Expanded(
+            child: TabBarView(
+              controller: _tabController,
+              children: [
+                // Abas de categorias
+                ..._categories.keys.map((cat) {
+                  return Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: GridView.count(
+                      crossAxisCount: 3,
+                      crossAxisSpacing: 8,
+                      mainAxisSpacing: 8,
+                      children: _categories[cat]!.map((buttonData) {
+                        return CustomButton(
+                          text: buttonData["text"]!,
+                          onPressed: () => addWord(buttonData["text"]!),
+                        );
+                      }).toList(),
+                    ),
+                  );
+                }).toList(),
+
+                // 🔹 Aba de texto livre
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    children: [
+                      TextField(
+                        maxLength: 140,
+                        maxLines: 4,
+                        decoration: InputDecoration(
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          hintText: "Digite sua frase aqui...",
+                          filled: true,
+                          fillColor: Colors.white,
+                        ),
+                        onChanged: (value) {
+                          setState(() {
+                            customText = value;
+                          });
+                        },
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        "${customText.length}/140 caracteres",
+                        style: TextStyle(
+                          color: Colors.grey[600],
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+
+      // 🔹 Botão inferior “Escutar frase”
+      bottomNavigationBar: BottomAppBar(
+        height: 100,
+        child: Center(
+          child: ElevatedButton(
+            onPressed: (_tabController.index == _categories.length
+                    ? customText.isEmpty
+                    : fullSentence.isEmpty)
+                ? null
+                : speak,
+            style: ElevatedButton.styleFrom(
+              minimumSize: const Size(200, 60),
+              backgroundColor: Colors.lightBlueAccent,
+              disabledBackgroundColor: Colors.grey[300],
+            ),
+            child: const Text(
+              "Escutar frase",
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class CustomButton extends StatelessWidget {
+  final String text;
+  final VoidCallback onPressed;
+
+  const CustomButton({super.key, required this.text, required this.onPressed});
+
+  @override
+  Widget build(BuildContext context) {
+    return ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        shadowColor: Colors.black26,
+        elevation: 3,
+      ),
+      onPressed: onPressed,
+      child: Text(
+        text,
+        textAlign: TextAlign.center,
+        style: const TextStyle(fontSize: 16),
+      ),
+    );
+  }
+}
+
+class SettingsPage extends StatelessWidget {
+  const SettingsPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text("Configurações")),
+      body: const Center(child: Text("Aqui vão as configurações.")),
+    );
+  }
+}
