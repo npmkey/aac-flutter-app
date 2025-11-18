@@ -10,15 +10,17 @@ class ComponentBox extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         border: Border.all(color: Colors.grey.shade300),
         borderRadius: BorderRadius.circular(8),
       ),
-      child: Wrap(
-        spacing: 10,
-        runSpacing: 10,
-        children: componentWords.map((data) => DraggablePictogram(data: data.copyWith(isClone: true))).toList(),
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Wrap(
+          spacing: 10,
+          runSpacing: 10,
+          children: componentWords.map((data) => DraggablePictogram(data: data.copyWith(isClone: true))).toList(),
+        ),
       ),
     );
   }

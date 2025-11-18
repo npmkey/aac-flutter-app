@@ -29,11 +29,11 @@ class MyApp extends StatelessWidget {
             title: const Text ("AAC app"),
             bottom: const TabBar(
               tabs: [
-                Tab(text: 'Tiles'),
+                Tab(text: 'Palavras'),
                 
-                Tab(text: 'Write'),
+                Tab(text: 'Formar Frases'),
 
-                Tab(text: 'configs'),
+                Tab(text: 'configurações'),
               ],
             )
           ),
