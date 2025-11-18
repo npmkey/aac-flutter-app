@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'pictogram_data.dart';
 import 'draggable_pictogram.dart';
+import 'trash_area.dart';
 
-class SentenceBox extends StatelessWidget {
+class SentenceBox extends StatefulWidget {
   final List<PictogramData> sentenceWords;
   final bool isReading;
   final VoidCallback onPlay;
@@ -19,61 +20,189 @@ class SentenceBox extends StatelessWidget {
   });
 
   @override
+  State<SentenceBox> createState() => _SentenceBoxState();
+}
+
+class _SentenceBoxState extends State<SentenceBox> {
+  final ScrollController _scrollController = ScrollController();
+
+  @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        color: const Color(0xFFdfefff),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: DragTarget<PictogramData>(
-              builder: (context, candidateData, rejectedData) {
-                return Container(
-                  height: 137,
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: candidateData.isNotEmpty ? Colors.blue.withOpacity(0.1) : Colors.white,
-                    borderRadius: BorderRadius.circular(5),
-                    border: Border.all(color: Colors.grey.shade400),
+    final isTablet = MediaQuery.of(context).size.width >= 700;
+
+    return Column(
+      children: [
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: DragTarget<PictogramData>(
+                builder: (context, candidateData, rejectedData) {
+                  return Container(
+                    height: 150,
+                    padding: const EdgeInsets.only(
+                        top: 4, left: 12, right: 12, bottom: 0), // 🔥 cards mais para o topo
+                    decoration: BoxDecoration(
+                      color: candidateData.isNotEmpty
+                          ? Colors.blue.withOpacity(0.1)
+                          : Colors.white,
+                      borderRadius: BorderRadius.circular(5),
+                      border: Border.all(color: Colors.grey.shade400),
+                    ),
+
+                    child: widget.sentenceWords.isEmpty
+                        ? const Center(
+                            child: Text(
+                              'Arraste aqui',
+                              style: TextStyle(color: Colors.grey),
+                            ),
+                          )
+                        : Scrollbar(
+                            controller: _scrollController,
+                            thumbVisibility: true,
+                            trackVisibility: true,
+                            radius: const Radius.circular(10),
+                            child: SingleChildScrollView(
+                              controller: _scrollController,
+                              scrollDirection: Axis.horizontal,
+
+                              child: Padding(
+                                padding: const EdgeInsets.only(
+                                    bottom: 20), // 🔥 grande espaço entre cards e scrollbar
+                                child: ReorderableListView.builder(
+                                  shrinkWrap: true,
+                                  scrollDirection: Axis.horizontal,
+                                  physics: const NeverScrollableScrollPhysics(),
+                                  itemCount: widget.sentenceWords.length,
+                                  onReorder: widget.onReorder,
+
+                                  itemBuilder: (context, index) {
+                                    final item = widget.sentenceWords[index];
+
+                                    return LongPressDraggable<PictogramData>(
+                                      key: ValueKey(item.id),
+                                      data: item,
+
+                                      feedback: Material(
+                                        color: Colors.transparent,
+                                        child: DraggablePictogram(
+                                          data: item,
+                                          isFromSentence: true,
+                                          reorderIndex: index,
+                                        ),
+                                      ),
+
+                                      childWhenDragging: Opacity(
+                                        opacity: 0.3,
+                                        child: DraggablePictogram(
+                                          data: item,
+                                          isFromSentence: true,
+                                          reorderIndex: index,
+                                        ),
+                                      ),
+
+                                      child: DraggablePictogram(
+                                        data: item,
+                                        isFromSentence: true,
+                                        reorderIndex: index,
+                                      ),
+                                    );
+                                  },
+
+                                  proxyDecorator: (child, index, animation) {
+                                    return Transform.scale(
+                                      scale: 1.1,
+                                      child: child,
+                                    );
+                                  },
+                                ),
+                              ),
+                            ),
+                          ),
+                  );
+                },
+                onAccept: widget.onAccept,
+              ),
+            ),
+
+            // → Botões tablet
+            if (isTablet) const SizedBox(width: 16),
+            if (isTablet)
+              Column(
+                children: [
+                  TrashArea(
+                    onAccept: (data) {
+                      setState(() {
+                        widget.sentenceWords
+                            .removeWhere((w) => w.id == data.id);
+                      });
+                    },
                   ),
-                  child: sentenceWords.isEmpty
-                      ? const Center(child: Text('Arraste aqui', style: TextStyle(color: Colors.grey)))
-                      : ReorderableListView(
-                          buildDefaultDragHandles: false,
-                          scrollDirection: Axis.horizontal,
-                          onReorder: onReorder,
-                          children: sentenceWords
-                              .map((word) => DraggablePictogram(
-                                    key: ValueKey(word.id), // Chave é crucial para reordenar
-                                    data: word,
-                                    isFromSentence: true,
-                                    reorderIndex: sentenceWords.indexOf(word),
-                                  ))
-                              .toList(),
+                  const SizedBox(height: 12),
+                  ElevatedButton(
+                    onPressed: widget.onPlay,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.all(14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    child: widget.isReading
+                        ? const SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 3,
+                            ),
+                          )
+                        : const Icon(Icons.play_arrow, size: 28),
+                  ),
+                ],
+              ),
+          ],
+        ),
+
+        const SizedBox(height: 10),
+
+        // → Botões celular
+        if (!isTablet)
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              TrashArea(
+                onAccept: (data) {
+                  setState(() {
+                    widget.sentenceWords.removeWhere((w) => w.id == data.id);
+                  });
+                },
+              ),
+              ElevatedButton(
+                onPressed: widget.onPlay,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.all(14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                child: widget.isReading
+                    ? const SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 3,
                         ),
-                );
-              },
-              onAccept: onAccept,
-            ),
+                      )
+                    : const Icon(Icons.play_arrow, size: 28),
+              ),
+            ],
           ),
-          const SizedBox(width: 10),
-          ElevatedButton(
-            onPressed: onPlay,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.blue,
-              foregroundColor: Colors.white,
-              shape: const CircleBorder(),
-              padding: const EdgeInsets.all(15),
-            ),
-            child: isReading
-                ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 3))
-                : const Icon(Icons.play_arrow, size: 30),
-          ),
-        ],
-      ),
+      ],
     );
   }
 }

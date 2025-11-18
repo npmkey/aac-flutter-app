@@ -12,8 +12,8 @@ class TrashArea extends StatelessWidget {
       builder: (context, candidateData, rejectedData) {
         bool isHovering = candidateData.isNotEmpty;
         return Container(
-          height: 80,
-          width: double.infinity,
+          height: 60,
+          width: 100,
           decoration: BoxDecoration(
             color: isHovering ? Colors.red.withOpacity(0.2) : Colors.transparent,
             border: Border.all(color: isHovering ? Colors.red : Colors.grey.shade400, width: 2),

@@ -19,7 +19,7 @@ class DraggablePictogram extends StatelessWidget {
       alignment: Alignment.center,
       children: [
         Container(
-          width: 90,
+          width: 80,
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
             color: Colors.white,

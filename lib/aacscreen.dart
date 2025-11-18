@@ -270,7 +270,7 @@ class _AACScreenState extends State<AACScreen> with SingleTickerProviderStateMix
     final screenWidth = MediaQuery.of(context).size.width;
 
     // cada cartão com ~120px
-    final crossAxisCount = (screenWidth / 120).floor().clamp(2, 6);
+    final crossAxisCount = (screenWidth / 100).floor().clamp(2, 6);
 
     return GridView.builder(
       padding: const EdgeInsets.all(16.0),
@@ -278,7 +278,7 @@ class _AACScreenState extends State<AACScreen> with SingleTickerProviderStateMix
         crossAxisCount: crossAxisCount, 
         crossAxisSpacing: 16,
         mainAxisSpacing: 16,
-        childAspectRatio: 0.9, // Ajuste a proporção para caber imagem e texto
+        childAspectRatio: 0.8, // Ajuste a proporção para caber imagem e texto
       ),
       itemCount: pictograms.length,
       itemBuilder: (context, index) {

@@ -7,7 +7,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'pictogram_data.dart'; 
 import 'sentence_box.dart'; 
 import 'component_box.dart'; 
-import 'trash_area.dart';
 
 class Tilesscreen extends StatefulWidget {
   const Tilesscreen({super.key});
@@ -267,7 +266,7 @@ class _AACScreenStatee extends State<Tilesscreen> with SingleTickerProviderState
               });
             },
           ),
-          const SizedBox(height: 30),
+          const SizedBox(height: 10),
 
           // 2. Caixa de Componentes
           Expanded(
@@ -294,13 +293,6 @@ class _AACScreenStatee extends State<Tilesscreen> with SingleTickerProviderState
           const SizedBox(height: 20),
 
           // 3. Lixeira
-          TrashArea(
-            onAccept: (data) {
-              setState(() {
-                _sentenceWords.removeWhere((word) => word.id == data.id);
-              });
-            },
-          ),
         ],
       ),
     );
