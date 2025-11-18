@@ -266,10 +266,16 @@ class _AACScreenState extends State<AACScreen> with SingleTickerProviderStateMix
 
   // Constrói a grade de pictogramas para uma categoria específica
   Widget _buildCategoryGrid(List<PictogramData> pictograms) {
+
+    final screenWidth = MediaQuery.of(context).size.width;
+
+    // cada cartão com ~120px
+    final crossAxisCount = (screenWidth / 120).floor().clamp(2, 6);
+
     return GridView.builder(
       padding: const EdgeInsets.all(16.0),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 3, // 3 ícones por linha
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: crossAxisCount, 
         crossAxisSpacing: 16,
         mainAxisSpacing: 16,
         childAspectRatio: 0.9, // Ajuste a proporção para caber imagem e texto
