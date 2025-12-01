@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'pictogram_data.dart';
+import 'dart:io'; // Importa a biblioteca para usar a classe File
 
 class DraggablePictogram extends StatelessWidget {
   final PictogramData data;
@@ -19,7 +20,7 @@ class DraggablePictogram extends StatelessWidget {
       alignment: Alignment.center,
       children: [
         Container(
-          width: 80,
+          width: 100,
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
             color: Colors.white,
@@ -29,9 +30,19 @@ class DraggablePictogram extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Image.asset(data.image, width: 60, height: 60, fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) =>
-                      const Icon(Icons.image_not_supported, size: 60, color: Colors.grey)),
+              // Lógica para decidir se a imagem vem dos assets ou de um arquivo
+              SizedBox(
+                height: 60, // Define uma altura fixa para a imagem
+                child: data.image.startsWith('assets/')
+                    ? Image.asset(data.image, fit: BoxFit.contain,
+                        errorBuilder: (context, error, stackTrace) =>
+                            const Icon(Icons.image_not_supported, size: 40, color: Colors.grey))
+                    : data.image.isNotEmpty
+                        ? Image.file(File(data.image), fit: BoxFit.contain,
+                            errorBuilder: (context, error, stackTrace) =>
+                                const Icon(Icons.broken_image, size: 40, color: Colors.grey))
+                        : const Icon(Icons.image_not_supported, size: 40, color: Colors.grey),
+              ),
               const SizedBox(height: 8),
               Text(data.text.replaceAll(',', ''), style: const TextStyle(fontSize: 16)),
               if (isFromSentence) const SizedBox(height: 12),

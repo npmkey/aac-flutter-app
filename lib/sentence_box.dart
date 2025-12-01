@@ -139,26 +139,30 @@ class _SentenceBoxState extends State<SentenceBox> {
                     },
                   ),
                   const SizedBox(height: 12),
-                  ElevatedButton(
-                    onPressed: widget.onPlay,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.all(14),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
+                  SizedBox(
+                    width: 100, // Define uma largura fixa
+                    height: 60, // Define uma altura fixa
+                    child: ElevatedButton(
+                      onPressed: widget.onPlay,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue,
+                        foregroundColor: Colors.white,
+                        padding: EdgeInsets.zero, // Remove o padding interno para centralizar o ícone
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
                       ),
+                      child: widget.isReading
+                          ? const SizedBox(
+                              width: 24,
+                              height: 24,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 3,
+                              ),
+                            )
+                          : const Icon(Icons.play_arrow, size: 32), // Ícone um pouco maior
                     ),
-                    child: widget.isReading
-                        ? const SizedBox(
-                            width: 24,
-                            height: 24,
-                            child: CircularProgressIndicator(
-                              color: Colors.white,
-                              strokeWidth: 3,
-                            ),
-                          )
-                        : const Icon(Icons.play_arrow, size: 28),
                   ),
                 ],
               ),
@@ -179,26 +183,30 @@ class _SentenceBoxState extends State<SentenceBox> {
                   });
                 },
               ),
-              ElevatedButton(
-                onPressed: widget.onPlay,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.all(14),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+              SizedBox(
+                width: 60, // Define uma largura fixa
+                height: 60, // Define uma altura fixa
+                child: ElevatedButton(
+                  onPressed: widget.onPlay,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue,
+                    foregroundColor: Colors.white,
+                    padding: EdgeInsets.zero, // Remove o padding interno para centralizar o ícone
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
                   ),
+                  child: widget.isReading
+                      ? const SizedBox(
+                          width: 24,
+                          height: 24,
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 3,
+                          ),
+                        )
+                      : const Icon(Icons.play_arrow, size: 32), // Ícone um pouco maior
                 ),
-                child: widget.isReading
-                    ? const SizedBox(
-                        width: 24,
-                        height: 24,
-                        child: CircularProgressIndicator(
-                          color: Colors.white,
-                          strokeWidth: 3,
-                        ),
-                      )
-                    : const Icon(Icons.play_arrow, size: 28),
               ),
             ],
           ),

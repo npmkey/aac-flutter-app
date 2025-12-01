@@ -3,8 +3,11 @@ import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'dart:convert';
+import 'dart:io';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:teste_flutter/pictogram_data.dart';
+import 'package:teste_flutter/pictogram_repository.dart';
+import 'package:teste_flutter/add_pictogram_dialog.dart';
 
 class AACScreen extends StatefulWidget {
   const AACScreen({super.key});
@@ -15,119 +18,6 @@ class AACScreen extends StatefulWidget {
 
 class _AACScreenState extends State<AACScreen> with SingleTickerProviderStateMixin {
   // --- ESTADO DA APLICAÇÃO ---
-  // Nova estrutura de dados com categorias
-  final Map<String, List<PictogramData>> _categorizedWords = {
-  'Pessoas': [
-    PictogramData(text: 'eu,', image: 'assets/images/eu.png'),
-    PictogramData(text: 'você,', image: 'assets/images/voce.png'),
-    PictogramData(text: 'ele,', image: 'assets/images/ele.png'),
-    PictogramData(text: 'ela,', image: 'assets/images/ela.png'),
-    PictogramData(text: 'nós,', image: 'assets/images/nos.png'),
-    PictogramData(text: 'eles,', image: 'assets/images/eles.png'),
-    PictogramData(text: 'família,', image: 'assets/images/familia.png'),
-    PictogramData(text: 'mãe,', image: 'assets/images/mae.png'),
-    PictogramData(text: 'pai,', image: 'assets/images/pai.png'),
-    PictogramData(text: 'amigo,', image: 'assets/images/amigo.png'),
-  ],
-
-  'Ações': [
-    PictogramData(text: 'querer,', image: 'assets/images/querer.png'),
-    PictogramData(text: 'ir,', image: 'assets/images/ir.png'),
-    PictogramData(text: 'precisar,', image: 'assets/images/precisar.png'),
-    PictogramData(text: 'fazer,', image: 'assets/images/fazer.png'),
-    PictogramData(text: 'pegar,', image: 'assets/images/pegar.png'),
-    PictogramData(text: 'soltar,', image: 'assets/images/soltar.png'),
-    PictogramData(text: 'comer,', image: 'assets/images/comer.png'),
-    PictogramData(text: 'beber,', image: 'assets/images/beber.png'),
-    PictogramData(text: 'brincar,', image: 'assets/images/brincar.png'),
-    PictogramData(text: 'parar,', image: 'assets/images/parar.png'),
-    PictogramData(text: 'abrir,', image: 'assets/images/abrir.png'),
-    PictogramData(text: 'fechar,', image: 'assets/images/fechar.png'),
-    PictogramData(text: 'sentar,', image: 'assets/images/sentar.png'),
-    PictogramData(text: 'levantar,', image: 'assets/images/levantar.png'),
-    PictogramData(text: 'ajudar,', image: 'assets/images/ajudar.png'),
-    PictogramData(text: 'olhar,', image: 'assets/images/olhar.png'),
-    PictogramData(text: 'ouvir,', image: 'assets/images/ouvir.png'),
-    PictogramData(text: 'falar,', image: 'assets/images/falar.png'),
-    PictogramData(text: 'mostrar,', image: 'assets/images/mostrar.png'),
-    PictogramData(text: 'colocar,', image: 'assets/images/colocar.png'),
-    PictogramData(text: 'tirar,', image: 'assets/images/tirar.png'),
-    PictogramData(text: 'gostar,', image: 'assets/images/gostar.png'),
-  ],
-
-  'Respostas': [
-    PictogramData(text: 'sim,', image: 'assets/images/sim.png'),
-    PictogramData(text: 'não,', image: 'assets/images/nao.png'),
-    PictogramData(text: 'talvez,', image: 'assets/images/talvez.png'),
-    PictogramData(text: 'ok,', image: 'assets/images/ok.png'),
-    PictogramData(text: 'pronto,', image: 'assets/images/pronto.png'),
-  ],
-
-  'Coisas': [
-    PictogramData(text: 'água,', image: 'assets/images/agua.png'),
-    PictogramData(text: 'comida,', image: 'assets/images/comida.png'),
-    PictogramData(text: 'roupa,', image: 'assets/images/roupa.png'),
-    PictogramData(text: 'brinquedo,', image: 'assets/images/brinquedo.png'),
-    PictogramData(text: 'copo,', image: 'assets/images/copo.png'),
-    PictogramData(text: 'celular,', image: 'assets/images/celular.png'),
-    PictogramData(text: 'livro,', image: 'assets/images/livro.png'),
-    PictogramData(text: 'mesa,', image: 'assets/images/mesa.png'),
-    PictogramData(text: 'cadeira,', image: 'assets/images/cadeira.png'),
-  ],
-
-  'Locais': [
-    PictogramData(text: 'casa,', image: 'assets/images/casa.png'),
-    PictogramData(text: 'escola,', image: 'assets/images/escola.png'),
-    PictogramData(text: 'banheiro,', image: 'assets/images/banheiro.png'),
-    PictogramData(text: 'cozinha,', image: 'assets/images/cozinha.png'),
-    PictogramData(text: 'quarto,', image: 'assets/images/quarto.png'),
-    PictogramData(text: 'fora,', image: 'assets/images/fora.png'),
-    PictogramData(text: 'dentro,', image: 'assets/images/dentro.png'),
-    PictogramData(text: 'carro,', image: 'assets/images/carro.png'),
-  ],
-
-  'Sentimentos': [
-    PictogramData(text: 'feliz,', image: 'assets/images/feliz.png'),
-    PictogramData(text: 'triste,', image: 'assets/images/triste.png'),
-    PictogramData(text: 'bravo,', image: 'assets/images/bravo.png'),
-    PictogramData(text: 'assustado,', image: 'assets/images/assustado.png'),
-    PictogramData(text: 'cansado,', image: 'assets/images/cansado.png'),
-    PictogramData(text: 'com medo,', image: 'assets/images/medo.png'),
-    PictogramData(text: 'calmo,', image: 'assets/images/calmo.png'),
-  ],
-
-  'Perguntas': [
-    PictogramData(text: 'o quê?', image: 'assets/images/oque.png'),
-    PictogramData(text: 'quem?', image: 'assets/images/quem.png'),
-    PictogramData(text: 'onde?', image: 'assets/images/onde.png'),
-    PictogramData(text: 'quando?', image: 'assets/images/quando.png'),
-    PictogramData(text: 'por quê?', image: 'assets/images/porque.png'),
-    PictogramData(text: 'como?', image: 'assets/images/como.png'),
-  ],
-
-  'Descrições': [
-    PictogramData(text: 'bom,', image: 'assets/images/bom.png'),
-    PictogramData(text: 'ruim,', image: 'assets/images/ruim.png'),
-    PictogramData(text: 'grande,', image: 'assets/images/grande.png'),
-    PictogramData(text: 'pequeno,', image: 'assets/images/pequeno.png'),
-    PictogramData(text: 'quente,', image: 'assets/images/quente.png'),
-    PictogramData(text: 'frio,', image: 'assets/images/frio.png'),
-    PictogramData(text: 'rápido,', image: 'assets/images/rapido.png'),
-    PictogramData(text: 'devagar,', image: 'assets/images/devagar.png'),
-    PictogramData(text: 'bonito,', image: 'assets/images/bonito.png'),
-    PictogramData(text: 'feio,', image: 'assets/images/feio.png'),
-  ],
-
-  'Conectores': [
-    PictogramData(text: 'e,', image: 'assets/images/e.png'),
-    PictogramData(text: 'mas,', image: 'assets/images/mas.png'),
-    PictogramData(text: 'porque,', image: 'assets/images/porque.png'),
-    PictogramData(text: 'então,', image: 'assets/images/entao.png'),
-    PictogramData(text: 'com,', image: 'assets/images/com.png'),
-    PictogramData(text: 'sem,', image: 'assets/images/sem.png'),
-  ],
-  };
-
   bool _isReading = false;
   String? _currentlyReadingText; // Para saber qual pictograma está falando
   late final Map<String, List<PictogramData>> _displayCategories;
@@ -137,17 +27,39 @@ class _AACScreenState extends State<AACScreen> with SingleTickerProviderStateMix
   @override
   void initState() {
     super.initState();
+    _updateDisplayCategories();
+    // Adiciona um 'ouvinte' para reconstruir a tela quando o repositório mudar.
+    PictogramRepository().addListener(_updateDisplayCategories);
+  }
 
-    // Cria uma lista com todos os pictogramas
-    final allPictograms = _categorizedWords.values.expand((list) => list).toList();
+  // Função para abrir o diálogo de adição
+  Future<void> _addPictogram() async {
+    final result = await showDialog<Map<String, dynamic>>(
+      context: context,
+      builder: (ctx) => const AddPictogramDialog(),
+    );
 
-    // Monta o mapa de categorias para exibição, com "Todos" primeiro
-    _displayCategories = {
-      'Todos': allPictograms,
-      ..._categorizedWords,
-    };
+    if (result != null) {
+      final newPictogram = result['pictogram'] as PictogramData;
+      final category = result['category'] as String;
+      PictogramRepository().addPictogram(category, newPictogram);
+    }
+  }
 
-    _tabController = TabController(length: _displayCategories.length, vsync: this);
+  // Centraliza a lógica de atualização das categorias para ser reutilizada.
+  void _updateDisplayCategories() {
+    final repository = PictogramRepository();
+    final allPictograms = repository.categorizedWords.values.expand((list) => list).toList();
+
+    setState(() {
+      _displayCategories = {
+        'Todos': allPictograms,
+        ...repository.categorizedWords,
+      };
+      // Recria o TabController para refletir o novo número de categorias (se houver)
+      _tabController?.dispose();
+      _tabController = TabController(length: _displayCategories.length, vsync: this);
+    });
   }
 
   // --- FUNÇÕES DE LÓGICA ---
@@ -236,6 +148,8 @@ class _AACScreenState extends State<AACScreen> with SingleTickerProviderStateMix
   @override
   void dispose() {
     _tabController?.dispose();
+    // É importante remover o ouvinte para evitar vazamentos de memória.
+    PictogramRepository().removeListener(_updateDisplayCategories);
     _audioPlayer.dispose();
     super.dispose();
   }
@@ -261,6 +175,11 @@ class _AACScreenState extends State<AACScreen> with SingleTickerProviderStateMix
           return _buildCategoryGrid(pictograms);
         }).toList(),
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _addPictogram,
+        tooltip: 'Adicionar Ficha',
+        child: const Icon(Icons.add),
+      ),
     );
   }
 
@@ -270,7 +189,7 @@ class _AACScreenState extends State<AACScreen> with SingleTickerProviderStateMix
     final screenWidth = MediaQuery.of(context).size.width;
 
     // cada cartão com ~120px
-    final crossAxisCount = (screenWidth / 100).floor().clamp(2, 6);
+    final crossAxisCount = (screenWidth / 120).floor().clamp(2, 6);
 
     return GridView.builder(
       padding: const EdgeInsets.all(16.0),
@@ -300,9 +219,15 @@ class _AACScreenState extends State<AACScreen> with SingleTickerProviderStateMix
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Expanded(
-                        child: Image.asset(pictogram.image, fit: BoxFit.contain,
-                            errorBuilder: (context, error, stackTrace) =>
-                                const Icon(Icons.image_not_supported, size: 50, color: Colors.grey)),
+                        child: pictogram.image.startsWith('assets/')
+                            ? Image.asset(pictogram.image, fit: BoxFit.contain,
+                                errorBuilder: (context, error, stackTrace) =>
+                                    const Icon(Icons.image_not_supported, size: 50, color: Colors.grey))
+                            : pictogram.image.isNotEmpty
+                                ? Image.file(File(pictogram.image), fit: BoxFit.contain,
+                                    errorBuilder: (context, error, stackTrace) =>
+                                        const Icon(Icons.broken_image, size: 50, color: Colors.grey))
+                                : const Icon(Icons.image_not_supported, size: 50, color: Colors.grey),
                       ),
                       const SizedBox(height: 8),
                       Text(
